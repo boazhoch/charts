@@ -7,13 +7,25 @@ import {
   IStockService
 } from "./IStockService";
 
+interface IStockDefaults {
+  INTERVAL: QUERY_INTERVALS;
+  OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
+  FUNCTION: QUERY_FUNCTIONS;
+}
+
 class StockService implements IStockService {
   private requester: IHttp;
+  private DEFAULTS: IStockDefaults = {
+    INTERVAL: QUERY_INTERVALS["5MIN"],
+    OUTPUT_SIZE: QUERY_OUTPUT_SIZE.COMPACT,
+    FUNCTION: QUERY_FUNCTIONS.TIME_SERIES_DAILY
+  };
+
   constructor(requester: IHttp) {
     this.requester = requester;
   }
 
-  async getStock(options: IStockQueryOptions) {
+  public async getStock(options: IStockQueryOptions) {
     // TODO: handle error and timeouts.
     const result = await this.requester.get(this.constructQuery(options));
     const payload = await result.json();
@@ -58,7 +70,7 @@ class StockService implements IStockService {
   }
 
   private functionQuery(
-    functionType: QUERY_FUNCTIONS = QUERY_FUNCTIONS.TIME_SERIES_DAILY
+    functionType: QUERY_FUNCTIONS = this.DEFAULTS.FUNCTION
   ) {
     return `function=${functionType}`;
   }
@@ -68,13 +80,13 @@ class StockService implements IStockService {
   }
 
   private intervalQuery(
-    intervalType: QUERY_INTERVALS = QUERY_INTERVALS["5MIN"]
+    intervalType: QUERY_INTERVALS = this.DEFAULTS.INTERVAL
   ) {
     return `interval=${intervalType}`;
   }
 
   private outputsizeQuery(
-    outputType: QUERY_OUTPUT_SIZE = QUERY_OUTPUT_SIZE.COMPACT
+    outputType: QUERY_OUTPUT_SIZE = this.DEFAULTS.OUTPUT_SIZE
   ) {
     return `outputsize=${outputType}`;
   }
