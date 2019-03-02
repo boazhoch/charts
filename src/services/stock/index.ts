@@ -4,7 +4,8 @@ import {
   QUERY_FUNCTIONS,
   QUERY_INTERVALS,
   QUERY_OUTPUT_SIZE,
-  IStockService
+  IStockService,
+  stockData
 } from "./IStockService";
 
 interface IStockDefaults {
@@ -12,6 +13,23 @@ interface IStockDefaults {
   OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
   FUNCTION: QUERY_FUNCTIONS;
 }
+
+type IPayload = {
+  "Meta Data": payloadMetaData;
+  "Time Series (Daily)": payloadStockDataDaily;
+};
+
+type payloadMetaData = {
+  "2. Symbol": string;
+};
+
+type payloadStockDataDaily = {
+  [index: string]: payloadStockData;
+};
+
+type payloadStockData = {
+  "4. close": string;
+};
 
 class StockService implements IStockService {
   private requester: IHttp;
@@ -25,23 +43,49 @@ class StockService implements IStockService {
     this.requester = requester;
   }
 
-  public async getStock(options: IStockQueryOptions) {
-    // TODO: handle error and timeouts.
-    const result = await this.requester.get(this.constructQuery(options));
-    const payload = await result.json();
-    const data = payload["Time Series (Daily)"];
-    let datesAndValuesArray = [];
-    for (const date in data) {
-      const dateToTimeStamp: number = new Date(date).getTime();
-      const closeValue: number = parseFloat(data[date]["4. close"]);
+  private getStockDataFromPayload(data: IPayload) {
+    return data["Time Series (Daily)"];
+  }
 
-      const dateValue = [dateToTimeStamp, closeValue];
+  private getStockMetaDataFromPayload(data: IPayload) {
+    return data["Meta Data"];
+  }
+
+  private normalizeStockData(stockData: payloadStockDataDaily) {
+    let datesAndValuesArray: stockData = [];
+
+    for (const data in stockData) {
+      const dateToTimeStamp: number = new Date(data).getTime();
+      const closeValue: number = parseFloat(stockData[data]["4. close"]);
+
+      const dateValue: [number, number] = [dateToTimeStamp, closeValue];
       datesAndValuesArray.push(dateValue);
     }
 
     datesAndValuesArray.reverse();
 
     return datesAndValuesArray;
+  }
+
+  private getSymbolName(metaData: any) {
+    return metaData["2. Symbol"];
+  }
+
+  private normalizePayloadData(data: IPayload) {
+    const stockData = this.getStockDataFromPayload(data);
+    const metaData = this.getStockMetaDataFromPayload(data);
+
+    return {
+      data: this.normalizeStockData(stockData),
+      name: this.getSymbolName(metaData)
+    };
+  }
+
+  public async getData(options: IStockQueryOptions) {
+    // TODO: handle error and timeouts.
+    const result = await this.requester.get(this.constructQuery(options));
+    const payload: IPayload = await result.json();
+    return this.normalizePayloadData(payload);
   }
 
   private constructQuery(options: IStockQueryOptions) {
