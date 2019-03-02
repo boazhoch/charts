@@ -1,0 +1,20 @@
+.navbar {
+  justify-content: center;
+}
+
+.svg-wrapper {
+  min-width: 65px;
+  padding-bottom: 5px;
+}
+
+.svg-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+}
+
+.svg-container:before {
+  content: "Chartim";
+  font-size: 0.75rem;
+}

@@ -1,65 +1,139 @@
 import { IHttp } from "../http/IHttp";
-import { IStockQueryOptions, QUERY_FUNCTIONS, QUERY_INTERVALS, QUERY_OUTPUT_SIZE, IStockService } from "./IStockService";
+import {
+  IStockQueryOptions,
+  QUERY_FUNCTIONS,
+  QUERY_INTERVALS,
+  QUERY_OUTPUT_SIZE,
+  IStockService,
+  stockData
+} from "./IStockService";
 
-class StockService implements IStockService { 
-    private requester: IHttp;
-    constructor(requester: IHttp) { 
-        this.requester = requester;
+interface IStockDefaults {
+  INTERVAL: QUERY_INTERVALS;
+  OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
+  FUNCTION: QUERY_FUNCTIONS;
+}
+
+type IPayload = {
+  "Meta Data": payloadMetaData;
+  "Time Series (Daily)": payloadStockDataDaily;
+};
+
+type payloadMetaData = {
+  "2. Symbol": string;
+};
+
+type payloadStockDataDaily = {
+  [index: string]: payloadStockData;
+};
+
+type payloadStockData = {
+  "4. close": string;
+};
+
+class StockService implements IStockService {
+  private requester: IHttp;
+  private DEFAULTS: IStockDefaults = {
+    INTERVAL: QUERY_INTERVALS["5MIN"],
+    OUTPUT_SIZE: QUERY_OUTPUT_SIZE.COMPACT,
+    FUNCTION: QUERY_FUNCTIONS.TIME_SERIES_DAILY
+  };
+
+  constructor(requester: IHttp) {
+    this.requester = requester;
+  }
+
+  private getStockDataFromPayload(data: IPayload) {
+    return data["Time Series (Daily)"];
+  }
+
+  private getStockMetaDataFromPayload(data: IPayload) {
+    return data["Meta Data"];
+  }
+
+  private normalizeStockData(stockData: payloadStockDataDaily) {
+    let datesAndValuesArray: stockData = [];
+
+    for (const data in stockData) {
+      const dateToTimeStamp: number = new Date(data).getTime();
+      const closeValue: number = parseFloat(stockData[data]["4. close"]);
+
+      const dateValue: [number, number] = [dateToTimeStamp, closeValue];
+      datesAndValuesArray.push(dateValue);
     }
 
-    async getStock(options: IStockQueryOptions) {
-        const result = await this.requester.get(this.constructQuery(options));
-        const payload = await result.json();
-        const data = payload["Time Series (Daily)"];
-        let datesAndValuesArray = [];
-        for (const date in data) {
-            const dateToTimeStamp: number = new Date(date).getTime();
-            const closeValue: number = parseFloat(data[date]['4. close']);
+    datesAndValuesArray.reverse();
 
-            const dateValue = [dateToTimeStamp, closeValue];
-            datesAndValuesArray.push(dateValue);
-        }
+    return datesAndValuesArray;
+  }
 
-        datesAndValuesArray.reverse();
+  private getSymbolName(metaData: any) {
+    return metaData["2. Symbol"];
+  }
 
-        return datesAndValuesArray;
-    }
+  private normalizePayloadData(data: IPayload) {
+    const stockData = this.getStockDataFromPayload(data);
+    const metaData = this.getStockMetaDataFromPayload(data);
 
-    private constructQuery(options: IStockQueryOptions) { 
-        const functionType = this.functionQuery(options.function);
-        const symbol = this.symbolQuery(options.symbol);
-        const outputSize = this.outputsizeQuery(options.output);
-        const interval = this.intervalQuery(options.interval);
-        return `/query?${this.chainQueryOptions([functionType, symbol, outputSize, interval])}&apikey=42ZHNDEL9LV70H59`;
-    }
+    return {
+      data: this.normalizeStockData(stockData),
+      name: this.getSymbolName(metaData)
+    };
+  }
 
-    private chainQueryOptions(options: string[]) { 
-        let queryString: string = '';
+  public async getData(options: IStockQueryOptions) {
+    // TODO: handle error and timeouts.
+    const result = await this.requester.get(this.constructQuery(options));
+    const payload: IPayload = await result.json();
+    return this.normalizePayloadData(payload);
+  }
 
-        options.forEach((option) => {
-            if (option) {
-                queryString = !queryString ? option : `${queryString}&${option}`;
-            }
-        });
+  private constructQuery(options: IStockQueryOptions) {
+    const functionType = this.functionQuery(options.function);
+    const symbol = this.symbolQuery(options.symbol);
+    const outputSize = this.outputsizeQuery(options.output);
+    const interval = this.intervalQuery(options.interval);
+    return `/query?${this.chainQueryOptions([
+      functionType,
+      symbol,
+      outputSize,
+      interval
+    ])}&apikey=42ZHNDEL9LV70H59`;
+  }
 
-        return queryString;
-    }
+  private chainQueryOptions(options: string[]) {
+    let queryString: string = "";
 
-    private functionQuery(functionType?: QUERY_FUNCTIONS) { 
-        return `function=${functionType || QUERY_FUNCTIONS.TIME_SERIES_DAILY}`;
-    }
+    options.forEach(option => {
+      if (option) {
+        queryString = !queryString ? option : `${queryString}&${option}`;
+      }
+    });
 
-    private symbolQuery(symbol: string) {
-        return `symbol=${symbol}`;
-    }
+    return queryString;
+  }
 
-    private intervalQuery(intervalType?: QUERY_INTERVALS) {
-        return `interval=${intervalType || QUERY_INTERVALS["5MIN"]}`;
-    }
+  private functionQuery(
+    functionType: QUERY_FUNCTIONS = this.DEFAULTS.FUNCTION
+  ) {
+    return `function=${functionType}`;
+  }
 
-    private outputsizeQuery(outputType?: QUERY_OUTPUT_SIZE) {
-        return `outputsize=${outputType || QUERY_OUTPUT_SIZE.COMPACT}`;
-    }
+  private symbolQuery(symbol: string) {
+    return `symbol=${symbol}`;
+  }
+
+  private intervalQuery(
+    intervalType: QUERY_INTERVALS = this.DEFAULTS.INTERVAL
+  ) {
+    return `interval=${intervalType}`;
+  }
+
+  private outputsizeQuery(
+    outputType: QUERY_OUTPUT_SIZE = this.DEFAULTS.OUTPUT_SIZE
+  ) {
+    return `outputsize=${outputType}`;
+  }
 }
 
 export default StockService;

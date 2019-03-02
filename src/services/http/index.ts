@@ -1,36 +1,35 @@
 import { IHttp } from "./IHttp";
 
-class Http implements IHttp { 
-    private endPoint: string;
-    
-    constructor(endPoint: string) { 
-        this.endPoint = endPoint;
-    }
+class Http implements IHttp {
+  private endPoint: string;
 
-    /**
-     *
-     *
-     * @private
-     * @param {string} path
-     * @returns
-     * @memberof Http
-     */
-    private extendEndPointWithPath(path: string) { 
-        return `${this.endPoint}${path}`;
-    }
+  public constructor(endPoint: string) {
+    this.endPoint = endPoint;
+  }
 
-    /**
-     *
-     *
-     * @param {string} path
-     * @returns
-     * @memberof Http
-     */
-    public get(path: string) {
-        const fullPath = this.extendEndPointWithPath(path);
-        return fetch(fullPath)
-    }
+  /**
+   *
+   *
+   * @private
+   * @param {string} path
+   * @returns
+   * @memberof Http
+   */
+  private extendEndPointWithPath(path: string) {
+    return `${this.endPoint}${path}`;
+  }
+
+  /**
+   *
+   *
+   * @param {string} path
+   * @returns
+   * @memberof Http
+   */
+  public get(path: string) {
+    const fullPath = this.extendEndPointWithPath(path);
+    return fetch(fullPath);
+  }
 }
-
 
 export default Http;
