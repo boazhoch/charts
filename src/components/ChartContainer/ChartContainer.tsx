@@ -1,15 +1,17 @@
-import React, { Component, Ref, RefObject } from "react";
+import React, { Component, RefObject } from "react";
 import {
   IStockService,
   IGetDataPayload
 } from "../../services/stock/IStockService";
 import { draggablePlotLine } from "../Chart/draggablePlotLine";
+import { INotifier } from "../../services/notification/INotifier";
 
 interface IProps {
   apiService: IStockService;
+  notifier: INotifier;
   renderProp: (
     config: any,
-    ref: RefObject<any>,
+    onChartInit: (chart: any) => void,
     addData: (symbol: string) => void
   ) => JSX.Element;
 }
@@ -55,14 +57,14 @@ const DEFAULT_CHART_OPTIONS = {
 
 class ChartContainer extends Component<IProps, IState> {
   private apiService: IStockService;
-  private chartRef: RefObject<any>;
+  private notifier: INotifier;
   private chart: any;
   private isThresholdLineExist = false;
 
   constructor(props: IProps) {
     super(props);
     this.apiService = props.apiService;
-    this.chartRef = React.createRef();
+    this.notifier = props.notifier;
   }
 
   state = {
@@ -71,12 +73,17 @@ class ChartContainer extends Component<IProps, IState> {
     config: DEFAULT_CHART_OPTIONS
   };
 
-  componentDidMount() {
-    const ref = this.chartRef;
-    if (ref) {
-      this.chart = ref.current.getChart();
-    }
-  }
+  private onChartInit = (chart: any) => {
+    this.chart = chart;
+
+    // Needed to relfow chart to fit container size
+    // This is pretty ugly but it's a known issue in highcharts
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        chart.reflow();
+      });
+    }, 30);
+  };
 
   private addSeries(data: IGetDataPayload) {
     this.chart.addSeries({
@@ -117,15 +124,37 @@ class ChartContainer extends Component<IProps, IState> {
     return data;
   }
 
-  public addData = async (symbol: string) => {
-    const data = await this.getData(symbol);
-    this.addSeries(data);
+  public addData = (symbol: string) => {
+    const onSuccess = (name: string) => {
+      this.notifier.success(
+        `Uou just added: ${name} to the chart, congarts! 🦄`
+      );
+    };
+
+    const onError = (err: Error) => {
+      this.notifier.error(err.message);
+    };
+
+    this.getData(symbol)
+      .then(result => {
+        if (result.err) {
+          throw result.err;
+        }
+        return result.data;
+      })
+      .then(data => {
+        if (data) {
+          this.addSeries(data);
+          onSuccess(data.name);
+        }
+      })
+      .catch(onError);
   };
 
   render() {
     return this.props.renderProp(
       this.state.config,
-      this.chartRef,
+      this.onChartInit,
       this.addData
     );
   }

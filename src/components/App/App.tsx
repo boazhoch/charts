@@ -1,13 +1,24 @@
-import React, { Component, RefObject } from "react";
+import React, { Component, Suspense } from "react";
 import "./App.css";
 import { IStockService } from "../../services/stock/IStockService";
-import ChartContainer from "../ChartContainer/ChartContainer";
 import Chart from "../Chart/Chart";
 import NavBar from "../NavBar/NavBar";
 import SearchBar from "../SearchBar/SearchBar";
+import ChartContainer from "../ChartContainer/ChartContainer";
+import Notification from "../Notification/Notification";
+import { INotifier } from "../../services/notification/INotifier";
+
+// //@ts-ignore
+// const NotificationComponent = React.lazy(() =>
+//   import("../Notification/Notification")
+// );
+// const ChartContainer = React.lazy(() =>
+//   import("../ChartContainer/ChartContainer")
+// );
 
 interface IProps {
   apiService: IStockService;
+  notifierService: INotifier;
 }
 
 class App extends Component<IProps> {
@@ -29,16 +40,19 @@ class App extends Component<IProps> {
                 A Simple app to present data in <strong>charts</strong>, have
                 fun
               </h2>
+              <Suspense fallback={<div>Loading...</div>} />
+              <Notification />
               <ChartContainer
+                notifier={this.props.notifierService}
                 apiService={this.props.apiService}
                 renderProp={(
                   config: any,
-                  ref: RefObject<any>,
+                  onChartInit: (chart: any) => void,
                   addData: (symbol: string) => void
                 ) => (
                   <>
                     <div className="columns">
-                      <div className="column is-full">
+                      <div className="column">
                         <SearchBar
                           placeholder={"Add stock by Symbol"}
                           name={"Symbol"}
@@ -51,7 +65,7 @@ class App extends Component<IProps> {
                     </div>
                     <div className="columns">
                       <div className="column is-full">
-                        <Chart config={config} chartRef={ref} />
+                        <Chart config={config} onChartInit={onChartInit} />
                       </div>
                     </div>
                   </>

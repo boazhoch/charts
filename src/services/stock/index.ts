@@ -7,6 +7,7 @@ import {
   IStockService,
   stockData
 } from "./IStockService";
+import { INotifier } from "../notification/INotifier";
 
 interface IStockDefaults {
   INTERVAL: QUERY_INTERVALS;
@@ -81,11 +82,27 @@ class StockService implements IStockService {
     };
   }
 
-  public async getData(options: IStockQueryOptions) {
-    // TODO: handle error and timeouts.
-    const result = await this.requester.get(this.constructQuery(options));
-    const payload: IPayload = await result.json();
-    return this.normalizePayloadData(payload);
+  public getData(options: IStockQueryOptions) {
+    return this.requester
+      .get(this.constructQuery(options))
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.Note) {
+          throw new Error("Too much api calls please try in a minute");
+        }
+        return { err: undefined, data: this.normalizePayloadData(result) };
+      })
+      .catch((err: Error) => {
+        return {
+          err,
+          data: undefined
+        };
+      });
   }
 
   private constructQuery(options: IStockQueryOptions) {

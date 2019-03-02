@@ -1,5 +1,7 @@
 export interface IStockService {
-  getData(options: IStockQueryOptions): Promise<IGetDataPayload>;
+  getData(
+    options: IStockQueryOptions
+  ): Promise<{ err?: Error; data?: IGetDataPayload }>;
 }
 
 export interface IGetDataPayload {

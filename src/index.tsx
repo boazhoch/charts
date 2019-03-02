@@ -7,13 +7,22 @@ import "../node_modules/bulma/css/bulma.min.css";
 import StockService from "./services/stock";
 import Http from "./services/http";
 import CONFIG from "./config";
-import "bulma/css/bulma.min.css";
+import Notifier from "./services/notification";
+// //@ts-ignore
+// import { IdleQueue } from "idlize/IdleQueue.mjs";
+
+// const queue = new IdleQueue({ ensureTasksRun: true });
+// queue.pushTask(() => {
+//   //@ts-ignore
+//   import("bulma/css/bulma.min.css");
+// });
 
 const http = new Http(CONFIG.STOCK_END_POINT);
+const notifier = new Notifier();
 const stockService = new StockService(http);
 
 ReactDOM.render(
-  <App apiService={stockService} />,
+  <App apiService={stockService} notifierService={notifier} />,
   document.getElementById("root")
 );
 
