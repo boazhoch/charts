@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./serviceWorker";
-import "../node_modules/bulma/css/bulma.min.css";
 import Bootstrap from "./components/Bootstrap/Bootstrap";
+import 'milligram/dist/milligram.min.css';
 
 
 ReactDOM.render(

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 import Notification from "../Notification/Notification";
 import Header from "../Header/Header";
+import './App.css';
 
 import { IApiService } from "../../services/stock/IStockService";
 import { INotifier } from "../../services/notification/INotifier";
@@ -9,10 +10,6 @@ import { ICache } from "../../services/cache/ICache";
 import { IChartContainerProps } from "../ChartContainer/ChartContainer";
 import { IChartProps } from "../Chart/Chart";
 import { ISearchBarProps } from "../SearchBar/SearchBar";
-//@ts-ignore
-import { rIC } from 'idlize/idle-callback-polyfills.mjs';
-
-
 
 interface IProps {
   apiServices?: {
@@ -62,7 +59,6 @@ class App extends Component<IProps, IState> {
   renderChart() {
     const { ChartContainer, Chart, SearchBar } = this.state;
     if (this.props.cache && this.props.apiServices && this.props.notifierService && ChartContainer && Chart && SearchBar) {
-      console.log(ChartContainer)
       return <ChartContainer
         cache={this.props.cache}
         notifier={this.props.notifierService}
@@ -77,7 +73,7 @@ class App extends Component<IProps, IState> {
                 <div className="column">
                   <SearchBar
                     submitButtonText={"Add stock"}
-                    placeholder={"Add stock by symbol (try 'ms' if you want to add microsoft 😉)"}
+                    placeholder={"Add stock by symbol ( try 'ms' if you want to add microsoft 😉)"}
                     name={"Symbol"}
                     type={"text"}
                     onSubmit={(data: { [index: string]: string }) => {
@@ -106,7 +102,7 @@ class App extends Component<IProps, IState> {
         <main>
           <section className="section">
             <div className="container has-text-centered">
-              <h1 className="title">Chartim</h1>
+              <h1 className="title">Chartim.</h1>
               <h2 className="subtitle">
                 A Simple app to present data in <strong>charts</strong>, have
                 fun.

@@ -141,6 +141,11 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
    * @memberof ChartContainer
    */
   public addData = (symbol: string) => {
+    if (!symbol) {
+      this.notifier.warning('You must enter a stock symbol!');
+      return;
+    }
+    
     const onSuccess = (name: string) => {
       this.notifier.success(
         `You just added ${name} to the chart, congarts! 🦄`
