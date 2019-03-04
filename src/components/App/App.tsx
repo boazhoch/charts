@@ -9,6 +9,8 @@ import { ICache } from "../../services/cache/ICache";
 import { IChartContainerProps } from "../ChartContainer/ChartContainer";
 import { IChartProps } from "../Chart/Chart";
 import { ISearchBarProps } from "../SearchBar/SearchBar";
+//@ts-ignore
+import { rIC } from 'idlize/idle-callback-polyfills.mjs';
 
 
 
@@ -93,7 +95,7 @@ class App extends Component<IProps, IState> {
           )}
       />
     }
-    return <></>
+    return <h5>Loading Please wait</h5>
   }
 
   render() {
