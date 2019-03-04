@@ -157,6 +157,11 @@ class ChartContainer extends Component<IProps, IState> {
       return;
     }
 
+    this.notifier.info(
+      `Hey we are retrieving your data
+      this may take a while, please wait...
+      `)
+
     this.getData(lowerCaseSymbol)
       .then(result => {
         if (result.err) {

@@ -83,7 +83,7 @@ function draggablePlotLine(axis: any) {
     getThresholdLine()
       .svgElem.css({ cursor: "pointer" })
       .translate(0, 0)
-      .on("mousedown", drag_start);
+      .on("mousedown", drag_start)
   }
 
   drag_stop();

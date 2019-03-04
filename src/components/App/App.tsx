@@ -9,11 +9,11 @@ import Header from "../Header/Header";
 import { ICache } from "../../services/cache/ICache";
 
 interface IProps {
-  apiServices: {
+  apiServices?: {
     [index: string]: IApiService;
   };
-  notifierService: INotifier;
-  cache: ICache
+  notifierService?: INotifier;
+  cache?: ICache
 }
 
 class App extends Component<IProps> {
@@ -36,21 +36,22 @@ class App extends Component<IProps> {
               </h2>
               <div className="columns is-fluid">
                 <div className="column is-full">
-                  <ChartContainer
+                  {
+                    this.props.cache && this.props.apiServices && this.props.notifierService && <ChartContainer
                     cache={this.props.cache}
                     notifier={this.props.notifierService}
                     apiService={this.props.apiServices["stock"]}
                     renderProp={(
-                      config: any,
-                      onChartInit: (chart: any) => void,
-                      addData: (symbol: string) => void
-                    ) => (
+                    config: any,
+                    onChartInit: (chart: any) => void,
+                    addData: (symbol: string) => void
+                  ) => (
                       <>
                         <div className="columns">
                           <div className="column">
                             <SearchBar
-                              submitButtonText={"Add Stock"}
-                              placeholder={"Add stock by Symbol"}
+                              submitButtonText={"Add stock"}
+                              placeholder={"Add stock by symbol (try 'ms' if you want to add microsoft 😉)"}
                               name={"Symbol"}
                               type={"text"}
                               onSubmit={(data: { [index: string]: string }) => {
@@ -66,7 +67,7 @@ class App extends Component<IProps> {
                         </div>
                       </>
                     )}
-                  />
+                  />}
                 </div>
               </div>
             </div>

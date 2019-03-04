@@ -25,14 +25,6 @@ const NavBar = () => {
             </svg>
           </div>
         </div>
-        <div
-          className="navbar-burger burger"
-          data-target="navbarExampleTransparentExample"
-        >
-          <span />
-          <span />
-          <span />
-        </div>
       </div>
     </nav>
   );
