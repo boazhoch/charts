@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import "./chart.css";
 const ReactHighstock = require("react-highcharts/ReactHighstock");
-interface IProps {
+export interface IChartProps {
   config: any;
   onChartInit: (chart: any) => void;
 }
 
-class Chart extends Component<IProps> {
-  constructor(props: IProps) {
+class Chart extends Component<IChartProps> {
+  constructor(props: IChartProps) {
     super(props);
   }
 

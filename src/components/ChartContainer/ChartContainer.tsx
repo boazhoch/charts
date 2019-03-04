@@ -13,7 +13,7 @@ import {
 import cloneDeep from "lodash/cloneDeep";
 import { ICache } from "../../services/cache/ICache";
 
-interface IProps {
+export interface IChartContainerProps {
   apiService: IApiService;
   notifier: INotifier;
   renderProp: (
@@ -28,17 +28,17 @@ interface IState {
   config: IChartOptions;
 }
 
-class ChartContainer extends Component<IProps, IState> {
+
+class ChartContainer extends Component<IChartContainerProps, IState> {
   private apiService: IApiService;
   private notifier: INotifier;
   // chart -> highcharts chart.
   private chart: any;
   private isThresholdLineExist = false;
   private reflowed = false;
-  private seriesNames: string[] = [];
   private cache: ICache;
 
-  constructor(props: IProps) {
+  constructor(props: IChartContainerProps) {
     super(props);
     this.cache = props.cache;
     this.apiService = props.apiService;
@@ -207,3 +207,4 @@ class ChartContainer extends Component<IProps, IState> {
 }
 
 export default ChartContainer;
+
