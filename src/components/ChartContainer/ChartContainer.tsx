@@ -1,90 +1,68 @@
-import React, { Component, RefObject } from "react";
+import React, { Component } from "react";
 import {
-  IStockService,
+  IApiService,
   IGetDataPayload
 } from "../../services/stock/IStockService";
-import { draggablePlotLine } from "../Chart/draggablePlotLine";
 import { INotifier } from "../../services/notification/INotifier";
+import { draggablePlotLine } from "../Chart/draggablePlotLine";
+import {
+  DEFAULT_CHART_OPTIONS,
+  THRESHOLD_DEFAULT_VALUE,
+  IChartOptions
+} from "./defaultChartOptions";
+import cloneDeep from "lodash/cloneDeep";
+import { ICache } from "../../services/cache/ICache";
 
 interface IProps {
-  apiService: IStockService;
+  apiService: IApiService;
   notifier: INotifier;
   renderProp: (
     config: any,
     onChartInit: (chart: any) => void,
     addData: (symbol: string) => void
   ) => JSX.Element;
+  cache: ICache;
 }
 
 interface IState {
-  data?: IGetDataPayload;
+  config: IChartOptions;
 }
 
-interface IProps {}
-
-const THRESHOLD_DEFAULT_VALUE = 10;
-
-const DEFAULT_CHART_OPTIONS = {
-  chart: {
-    zoomType: "xy"
-  },
-  plotOptions: {
-    area: {
-      allowPointSelect: true,
-      fillOpacity: 0.2,
-      lineWidth: 1,
-      step: "center"
-    },
-    series: {
-      dataLabels: {
-        enabled: true
-      },
-      threshold: THRESHOLD_DEFAULT_VALUE
-    }
-  },
-  yAxis: {
-    min: 0,
-    title: {
-      text: "Close rate"
-    }
-  },
-  series: [
-    {
-      data: []
-    }
-  ]
-};
-
 class ChartContainer extends Component<IProps, IState> {
-  private apiService: IStockService;
+  private apiService: IApiService;
   private notifier: INotifier;
+  // chart -> highcharts chart.
   private chart: any;
   private isThresholdLineExist = false;
+  private reflowed = false;
+  private seriesNames: string[] = [];
+  private cache: ICache;
 
   constructor(props: IProps) {
     super(props);
+    this.cache = props.cache;
     this.apiService = props.apiService;
     this.notifier = props.notifier;
   }
 
   state = {
-    data: undefined,
-    threshold: THRESHOLD_DEFAULT_VALUE,
-    config: DEFAULT_CHART_OPTIONS
+    config: cloneDeep(DEFAULT_CHART_OPTIONS)
   };
 
+  // callback method after chart initialization 
   private onChartInit = (chart: any) => {
     this.chart = chart;
-
-    // Needed to relfow chart to fit container size
-    // This is pretty ugly but it's a known issue in highcharts
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        chart.reflow();
-      });
-    }, 30);
   };
 
+  /**
+   * Add data to the chart.
+   * Reflow chart after adding data to chart.
+   * Init threshold line after adding data.
+   *
+   * @private
+   * @param {IGetDataPayload} data
+   * @memberof ChartContainer
+   */
   private addSeries(data: IGetDataPayload) {
     this.chart.addSeries({
       id: data.name,
@@ -94,9 +72,32 @@ class ChartContainer extends Component<IProps, IState> {
       data: data.data
     });
 
+    this.reflowChart();
+
     this.initThresholdLine();
   }
 
+  /**
+   * Reflow chart only once to fix container issue take a look here:
+   * https://stackoverflow.com/questions/33785708/highcharts-container-wider-than-parent-div
+   *
+   * @private
+   * @memberof ChartContainer
+   */
+  private reflowChart() {
+    !this.reflowed &&
+      requestAnimationFrame(() => {
+        this.chart.reflow();
+        this.reflowed = true;
+      });
+  }
+
+  /**
+   * Init threshold line once adding the ability to drag.
+   *
+   * @private
+   * @memberof ChartContainer
+   */
   private initThresholdLine() {
     if (!this.isThresholdLineExist) {
       const line = this.chart.yAxis[0].addPlotLine({
@@ -119,15 +120,30 @@ class ChartContainer extends Component<IProps, IState> {
     }
   }
 
+  /**
+   * Get data from the api service and return it.
+   *
+   * @private
+   * @param {string} symbol
+   * @returns
+   * @memberof ChartContainer
+   */
   private async getData(symbol: string) {
     const data = await this.apiService.getData({ symbol });
     return data;
   }
 
+  /**
+   * The process of adding data to the chart.
+   * 
+   * @param {string} symbol
+   * @public
+   * @memberof ChartContainer
+   */
   public addData = (symbol: string) => {
     const onSuccess = (name: string) => {
       this.notifier.success(
-        `Uou just added: ${name} to the chart, congarts! 🦄`
+        `You just added ${name} to the chart, congarts! 🦄`
       );
     };
 
@@ -135,7 +151,13 @@ class ChartContainer extends Component<IProps, IState> {
       this.notifier.error(err.message);
     };
 
-    this.getData(symbol)
+    const lowerCaseSymbol = symbol.toLowerCase()
+
+    if (this.isDataExist(lowerCaseSymbol)) {
+      return;
+    }
+
+    this.getData(lowerCaseSymbol)
       .then(result => {
         if (result.err) {
           throw result.err;
@@ -145,11 +167,30 @@ class ChartContainer extends Component<IProps, IState> {
       .then(data => {
         if (data) {
           this.addSeries(data);
+          this.cache.addToCache(data.name);
           onSuccess(data.name);
         }
       })
       .catch(onError);
   };
+
+  /**
+   * Check if data already exist, notify if it is.
+   *
+   * @private
+   * @param {string} name
+   * @returns
+   * @memberof ChartContainer
+   */
+  private isDataExist(name:string) { 
+    if (this.cache.isCached(name)) {
+      this.notifier.warning(
+        `Please note we already have ${name} on the chart`
+      );
+      return true;
+    }
+    return false;
+  }
 
   render() {
     return this.props.renderProp(

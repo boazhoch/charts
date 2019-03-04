@@ -8,6 +8,7 @@ import StockService from "./services/stock";
 import Http from "./services/http";
 import CONFIG from "./config";
 import Notifier from "./services/notification";
+import PopulationService from "./services/population";
 // //@ts-ignore
 // import { IdleQueue } from "idlize/IdleQueue.mjs";
 
@@ -17,12 +18,17 @@ import Notifier from "./services/notification";
 //   import("bulma/css/bulma.min.css");
 // });
 
-const http = new Http(CONFIG.STOCK_END_POINT);
+const stockServiceRequester = new Http(CONFIG.STOCK_END_POINT);
 const notifier = new Notifier();
-const stockService = new StockService(http);
+const stockService = new StockService(stockServiceRequester);
+const cache = new Cache()
+
+const services = {
+  stock: stockService,
+};
 
 ReactDOM.render(
-  <App apiService={stockService} notifierService={notifier} />,
+  <App apiServices={services} notifierService={notifier} cache={cache} />,
   document.getElementById("root")
 );
 

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
+import "./chart.css";
 const ReactHighstock = require("react-highcharts/ReactHighstock");
-
 interface IProps {
   config: any;
   onChartInit: (chart: any) => void;

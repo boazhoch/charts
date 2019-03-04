@@ -1,38 +1,17 @@
 import { IHttp } from "../http/IHttp";
 import {
-  IStockQueryOptions,
+  IApiDataOptions,
   QUERY_FUNCTIONS,
   QUERY_INTERVALS,
   QUERY_OUTPUT_SIZE,
-  IStockService,
-  stockData
+  IApiService,
+  stockData,
+  IStockDefaults,
+  IPayload,
+  payloadStockDataDaily
 } from "./IStockService";
-import { INotifier } from "../notification/INotifier";
 
-interface IStockDefaults {
-  INTERVAL: QUERY_INTERVALS;
-  OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
-  FUNCTION: QUERY_FUNCTIONS;
-}
-
-type IPayload = {
-  "Meta Data": payloadMetaData;
-  "Time Series (Daily)": payloadStockDataDaily;
-};
-
-type payloadMetaData = {
-  "2. Symbol": string;
-};
-
-type payloadStockDataDaily = {
-  [index: string]: payloadStockData;
-};
-
-type payloadStockData = {
-  "4. close": string;
-};
-
-class StockService implements IStockService {
+class StockService implements IApiService {
   private requester: IHttp;
   private DEFAULTS: IStockDefaults = {
     INTERVAL: QUERY_INTERVALS["5MIN"],
@@ -82,7 +61,7 @@ class StockService implements IStockService {
     };
   }
 
-  public getData(options: IStockQueryOptions) {
+  public getData(options: IApiDataOptions) {
     return this.requester
       .get(this.constructQuery(options))
       .then(response => {
@@ -105,11 +84,12 @@ class StockService implements IStockService {
       });
   }
 
-  private constructQuery(options: IStockQueryOptions) {
-    const functionType = this.functionQuery(options.function);
+  private constructQuery(options: IApiDataOptions) {
+    const functionType = this.functionQuery();
     const symbol = this.symbolQuery(options.symbol);
-    const outputSize = this.outputsizeQuery(options.output);
-    const interval = this.intervalQuery(options.interval);
+    const outputSize = this.outputsizeQuery();
+    const interval = this.intervalQuery();
+
     return `/query?${this.chainQueryOptions([
       functionType,
       symbol,
