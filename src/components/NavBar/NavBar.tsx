@@ -7,9 +7,9 @@ interface INavBarProps {
 
 const NavBar = () => {
   return (
-    <nav className={`navbar is-link ${style["navbar"]}`}>
-      <div className="navbar-brand">
-        <div className={`navbar-item ${style["svg-wrapper"]}`}>
+    <nav className={`${style["navbar"]}`}>
+      <div className={`${style["navbar-brand"]}`}>
+        <div>
           <div className={style["svg-container"]}>
             <svg
               className={style["svg-item"]}

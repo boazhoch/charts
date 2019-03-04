@@ -1,5 +1,7 @@
 import React, { Component, ChangeEvent, FormEvent } from "react";
 
+import style from './Form.module.css';
+
 interface IProps {
   submitButtonValue?: string;
   onSubmit(data: fromControl): void;
@@ -47,7 +49,7 @@ class Form extends Component<IProps, IState> {
         {this.props.render(this.handleChange)}
         <div className="field">
           <div className="control has-text-centered">
-            <button className="button" type="submit">
+            <button className={`${style['submit-button']}`} type="submit">
               {this.state.submitButtonValue}
             </button>
           </div>

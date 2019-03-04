@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Form from "../Form/Form";
 import FormInput from "../FormInput/FormInput";
 
-interface IProps {
+export interface ISearchBarProps {
   placeholder?: string;
   type: string;
   name: string;
@@ -10,7 +10,7 @@ interface IProps {
   onSubmit(data: { [index: string]: string }): void;
 }
 
-class SearchBar extends Component<IProps> {
+class SearchBar extends Component<ISearchBarProps> {
   state = {
     value: ""
   };

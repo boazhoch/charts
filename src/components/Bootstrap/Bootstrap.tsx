@@ -13,10 +13,9 @@ import { IApiService } from "../../services/stock/IStockService";
 import { INotifier } from "../../services/notification/INotifier";
 import { ICache } from "../../services/cache/ICache";
 //@ts-ignore
-// import { IdleQueue } from "idlize/IdleQueue.mjs";
+import { IdleQueue } from "idlize/IdleQueue.mjs";
 
-// const queue = new IdleQueue({ ensureTasksRun: true });
-
+const queuer = new IdleQueue({ ensureTasksRun: true });
 
 interface IProps {}
 
@@ -27,6 +26,7 @@ class Bootstrap extends Component<IProps> {
         };
         notifierService: INotifier;
         cache: ICache;
+        queuer: any;
     }
     
     constructor(props: IProps) {
@@ -45,7 +45,7 @@ class Bootstrap extends Component<IProps> {
             stock: apiFactory.getService('stock', stockRequester)
         };
 
-        this.appProps = { apiServices: services, notifierService: notifier, cache: simpleCache }
+        this.appProps = { apiServices: services, notifierService: notifier, cache: simpleCache, queuer }
     }
 
     render() {

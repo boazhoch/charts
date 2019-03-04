@@ -1,20 +1,14 @@
 .navbar {
+  background-color: #0078d4;
+}
+
+.navbar-brand {
   justify-content: center;
-}
-
-.svg-wrapper {
-  min-width: 65px;
-  padding-bottom: 5px;
-}
-
-.svg-container {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
+  display: flex;
 }
 
 .svg-container:before {
+  color: #fff;
   content: "Chartim";
   font-size: 0.75rem;
 }

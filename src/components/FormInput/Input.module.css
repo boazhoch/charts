@@ -1,5 +1,5 @@
 .input {
-  transtion: border-color .2s ease-out;
+  transition: border-color .4s ease-out;
 }
 
 .is-invalid {
