@@ -1,7 +1,13 @@
+import { IHttp } from "../http/IHttp";
+
 export interface IApiService {
   getData(
     options: IApiDataOptions
   ): Promise<{ err?: Error; data?: IGetDataPayload }>;
+}
+
+export interface IApiServiceConstructor {
+  new(requester: IHttp): IApiService;
 }
 
 export interface IGetDataPayload {

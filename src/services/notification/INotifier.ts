@@ -5,4 +5,8 @@ export interface INotifier {
   error: notificationMethod;
 }
 
+export interface INotifierConstructor {
+  new(): INotifier;
+}
+
 export type notificationMethod = (text: string) => void;
