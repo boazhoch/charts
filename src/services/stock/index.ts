@@ -1,37 +1,17 @@
 import { IHttp } from "../http/IHttp";
 import {
-  IStockQueryOptions,
+  IApiDataOptions,
   QUERY_FUNCTIONS,
   QUERY_INTERVALS,
   QUERY_OUTPUT_SIZE,
-  IStockService,
-  stockData
+  IApiService,
+  stockData,
+  IStockDefaults,
+  IPayload,
+  payloadStockDataDaily
 } from "./IStockService";
 
-interface IStockDefaults {
-  INTERVAL: QUERY_INTERVALS;
-  OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
-  FUNCTION: QUERY_FUNCTIONS;
-}
-
-type IPayload = {
-  "Meta Data": payloadMetaData;
-  "Time Series (Daily)": payloadStockDataDaily;
-};
-
-type payloadMetaData = {
-  "2. Symbol": string;
-};
-
-type payloadStockDataDaily = {
-  [index: string]: payloadStockData;
-};
-
-type payloadStockData = {
-  "4. close": string;
-};
-
-class StockService implements IStockService {
+class StockService implements IApiService {
   private requester: IHttp;
   private DEFAULTS: IStockDefaults = {
     INTERVAL: QUERY_INTERVALS["5MIN"],
@@ -81,18 +61,35 @@ class StockService implements IStockService {
     };
   }
 
-  public async getData(options: IStockQueryOptions) {
-    // TODO: handle error and timeouts.
-    const result = await this.requester.get(this.constructQuery(options));
-    const payload: IPayload = await result.json();
-    return this.normalizePayloadData(payload);
+  public getData(options: IApiDataOptions) {
+    return this.requester
+      .get(this.constructQuery(options))
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.Note) {
+          throw new Error("Too much api calls please try in a minute");
+        }
+        return { err: undefined, data: this.normalizePayloadData(result) };
+      })
+      .catch((err: Error) => {
+        return {
+          err,
+          data: undefined
+        };
+      });
   }
 
-  private constructQuery(options: IStockQueryOptions) {
-    const functionType = this.functionQuery(options.function);
+  private constructQuery(options: IApiDataOptions) {
+    const functionType = this.functionQuery();
     const symbol = this.symbolQuery(options.symbol);
-    const outputSize = this.outputsizeQuery(options.output);
-    const interval = this.intervalQuery(options.interval);
+    const outputSize = this.outputsizeQuery();
+    const interval = this.intervalQuery();
+
     return `/query?${this.chainQueryOptions([
       functionType,
       symbol,

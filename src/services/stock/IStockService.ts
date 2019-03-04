@@ -1,5 +1,13 @@
-export interface IStockService {
-  getData(options: IStockQueryOptions): Promise<IGetDataPayload>;
+import { IHttp } from "../http/IHttp";
+
+export interface IApiService {
+  getData(
+    options: IApiDataOptions
+  ): Promise<{ err?: Error; data?: IGetDataPayload }>;
+}
+
+export interface IApiServiceConstructor {
+  new(requester: IHttp): IApiService;
 }
 
 export interface IGetDataPayload {
@@ -32,11 +40,31 @@ enum QUERY_OUTPUT_SIZE {
   FULL = "full"
 }
 
-export interface IStockQueryOptions {
-  function?: QUERY_FUNCTIONS;
-  interval?: QUERY_INTERVALS;
-  output?: QUERY_OUTPUT_SIZE;
+export interface IApiDataOptions {
   symbol: string;
 }
+
+export interface IStockDefaults {
+  INTERVAL: QUERY_INTERVALS;
+  OUTPUT_SIZE: QUERY_OUTPUT_SIZE;
+  FUNCTION: QUERY_FUNCTIONS;
+}
+
+export type IPayload = {
+  "Meta Data": payloadMetaData;
+  "Time Series (Daily)": payloadStockDataDaily;
+};
+
+type payloadMetaData = {
+  "2. Symbol": string;
+};
+
+export type payloadStockDataDaily = {
+  [index: string]: payloadStockData;
+};
+
+type payloadStockData = {
+  "4. close": string;
+};
 
 export { QUERY_FUNCTIONS, QUERY_INTERVALS, QUERY_OUTPUT_SIZE };

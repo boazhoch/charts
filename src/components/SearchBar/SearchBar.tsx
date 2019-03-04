@@ -6,6 +6,7 @@ interface IProps {
   placeholder?: string;
   type: string;
   name: string;
+  submitButtonText?: string;
   onSubmit(data: { [index: string]: string }): void;
 }
 
@@ -28,7 +29,7 @@ class SearchBar extends Component<IProps> {
   render() {
     return (
       <Form
-        submitButtonValue={"Add stock"}
+        submitButtonValue={this.props.submitButtonText}
         onSubmit={this.handleSubmit}
         render={formControlOnChange => {
           return (

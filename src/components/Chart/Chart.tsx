@@ -1,9 +1,9 @@
-import React, { Component, RefObject } from "react";
+import React, { Component } from "react";
+import "./chart.css";
 const ReactHighstock = require("react-highcharts/ReactHighstock");
-
 interface IProps {
   config: any;
-  chartRef: RefObject<any>;
+  onChartInit: (chart: any) => void;
 }
 
 class Chart extends Component<IProps> {
@@ -13,7 +13,12 @@ class Chart extends Component<IProps> {
 
   render() {
     return (
-      <ReactHighstock ref={this.props.chartRef} config={this.props.config} />
+      <ReactHighstock
+        config={this.props.config}
+        callback={(chart: any) => {
+          this.props.onChartInit(chart);
+        }}
+      />
     );
   }
 }
