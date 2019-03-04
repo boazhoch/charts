@@ -8,7 +8,8 @@ import StockService from "./services/stock";
 import Http from "./services/http";
 import CONFIG from "./config";
 import Notifier from "./services/notification";
-import PopulationService from "./services/population";
+import cacheFactory from "./services/CacheFactory";
+import CacheService from "./services/cache";
 // //@ts-ignore
 // import { IdleQueue } from "idlize/IdleQueue.mjs";
 
@@ -18,10 +19,12 @@ import PopulationService from "./services/population";
 //   import("bulma/css/bulma.min.css");
 // });
 
+const cachingFactory = cacheFactory({ simple: CacheService });
+const simpleCache = cachingFactory.getService('simple');
+
 const stockServiceRequester = new Http(CONFIG.STOCK_END_POINT);
 const notifier = new Notifier();
 const stockService = new StockService(stockServiceRequester);
-const cache = new Cache()
 
 const services = {
   stock: stockService,

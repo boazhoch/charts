@@ -28,7 +28,7 @@ class App extends Component<IProps> {
         <Notification />
         <main>
           <section className="section">
-            <div className="container">
+            <div className="container has-text-centered">
               <h1 className="title">Chartim</h1>
               <h2 className="subtitle">
                 A Simple app to present data in <strong>charts</strong>, have

@@ -1,6 +1,6 @@
 import { ICache } from "./ICache";
 
-class Cache implements ICache { 
+class CacheService implements ICache { 
     private cachedArray: string[] = []
 
     public addToCache(name: string) { 
@@ -12,4 +12,4 @@ class Cache implements ICache {
     }
 }
 
-export default Cache;
+export default CacheService;
