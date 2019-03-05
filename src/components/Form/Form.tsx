@@ -15,7 +15,7 @@ interface IState {
   formControls: fromControl;
 }
 
-type fromControl = {
+export type fromControl = {
   [index: string]: string;
 };
 

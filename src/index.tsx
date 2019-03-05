@@ -4,6 +4,8 @@ import * as serviceWorker from "./serviceWorker";
 import Bootstrap from "./components/Bootstrap/Bootstrap";
 import 'milligram/dist/milligram.min.css';
 
+serviceWorker.register()
+
 
 ReactDOM.render(
   <Bootstrap />,

@@ -1,3 +1,7 @@
+.body { 
+  background-color: #fff;
+}
+
 .has-text-centered {
   text-align: center;
 }
