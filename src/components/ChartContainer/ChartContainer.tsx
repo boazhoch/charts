@@ -66,15 +66,15 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
   private addSeries(data: IGetDataPayload) {
     this.chart.addSeries({
       id: data.name,
-      type: "spline",
+      type: "areaspline",
       name: data && data.name,
-      negativeColor: "#AAA",
+      negativeColor: "rgb(226, 95, 95,0.4)",
       data: data.data
     });
 
     this.reflowChart();
 
-    this.initThresholdLine();
+    this.initThresholdLine(data.average);
   }
 
   /**
@@ -98,13 +98,17 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
    * @private
    * @memberof ChartContainer
    */
-  private initThresholdLine() {
+  private initThresholdLine(value: number) {
     if (!this.isThresholdLineExist) {
+      this.chart.update({
+        plotOptions: { series: { threshold: value } }
+      });
       const line = this.chart.yAxis[0].addPlotLine({
-        value: THRESHOLD_DEFAULT_VALUE,
-        color: "#f4df41",
+        value: value,
+        color: "rgba(239, 59, 59,1)",
         width: 3,
         zIndex: 10,
+        dashStyle: 'LongDash',
         label: {
           text: "Threshold"
         },

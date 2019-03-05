@@ -32,7 +32,7 @@ type seriesObject = {
 
 const DEFAULT_CHART_OPTIONS: IChartOptions = {
   chart: {
-    zoomType: "xy"
+    zoomType: "xy",
   },
   plotOptions: {
     area: {
@@ -49,7 +49,6 @@ const DEFAULT_CHART_OPTIONS: IChartOptions = {
     }
   },
   yAxis: {
-    min: 0,
     title: {
       text: "Close rate"
     }

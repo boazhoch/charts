@@ -12,6 +12,7 @@ export interface IApiServiceConstructor {
 
 export interface IGetDataPayload {
   data: stockData;
+  average: number;
   name: string;
 }
 

@@ -51,13 +51,20 @@ class StockService implements IApiService {
     return metaData["2. Symbol"];
   }
 
+  private getAvgFromStock(list: number[]) {
+    return list.reduce((prev, next) => prev + next) / list.length;
+  }
+
   private normalizePayloadData(data: IPayload) {
     const stockData = this.getStockDataFromPayload(data);
     const metaData = this.getStockMetaDataFromPayload(data);
+    const normalized = this.normalizeStockData(stockData);
+    const getNumeric = (list: [number, number][]) => list.map(arr => arr[1]);
 
     return {
-      data: this.normalizeStockData(stockData),
-      name: this.getSymbolName(metaData)
+      data: normalized,
+      name: this.getSymbolName(metaData),
+      average: this.getAvgFromStock(getNumeric(normalized))
     };
   }
 

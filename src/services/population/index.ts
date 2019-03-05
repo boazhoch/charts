@@ -35,8 +35,8 @@ class PopulationService implements IApiService {
 
   private normalizePayloadData(
     data: IPayload
-  ): { name: string; data: [number, number][] } {
-    return { data: [[1, 2], [1, 2]], name: "123" };
+  ): { name: string; data: [number, number][], average: number } {
+    return { data: [[1, 2], [1, 2]], name: "123", average: 1 };
   }
 
   private constructQuery(options: IApiDataOptions) {
