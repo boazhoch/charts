@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Form from "../Form/Form";
+import Form, { fromControl } from "../Form/Form";
 import FormInput from "../FormInput/FormInput";
 
 export interface ISearchBarProps {
@@ -22,7 +22,7 @@ class SearchBar extends Component<ISearchBarProps> {
     return false;
   };
 
-  handleSubmit = (data: any) => {
+  handleSubmit = (data: fromControl) => {
     this.props.onSubmit(data);
   };
 

@@ -4,11 +4,16 @@
 
 .navbar-brand {
   justify-content: center;
-  display: flex;
+  display: flex; 
+}
+
+.svg-container {
+  max-width: 65px;
+  text-align: center;
 }
 
 .svg-container:before {
   color: #fff;
   content: "Chartim";
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
