@@ -37,6 +37,7 @@
   ],
   "devDependencies": {
     "react-app-rewired": "^2.1.0",
+    "react-testing-library": "^6.0.0",
     "workbox-webpack-plugin": "^4.0.0"
   }
 }

@@ -17,7 +17,7 @@ interface IProps {
   };
   notifierService?: INotifier;
   cache?: ICache;
-  queuer: any
+  queuer?: any
 }
 
 interface IState {
@@ -27,6 +27,7 @@ interface IState {
 }
 
 class App extends Component<IProps, IState> {
+  private mounted?: boolean;
   constructor(props: IProps) {
     super(props);
 
@@ -38,21 +39,45 @@ class App extends Component<IProps, IState> {
   }
 
   componentDidMount() {
-    this.props.queuer.pushTask(() => {
-      const ChartModule = import('../Chart/Chart')
-      const SearchBarModule = import('../SearchBar/SearchBar')
-      const ChartContainerModule = import('../ChartContainer/ChartContainer')
-
-      Promise.all([ChartContainerModule, SearchBarModule, ChartModule]).then(modules => {
+    this.mounted = true;
+    
+    const loadComponents = () => {
+      this.loadComponents().then(modules => {
         const [ChartContainer, SearchBar, Chart] = modules;
-        this.setState({
+        this.mounted && this.setState({
           ChartContainer: ChartContainer.default,
           SearchBar: SearchBar.default,
           Chart: Chart.default
         })
-      }).catch(err => {
-        console.log(err);
+      }).catch((err: Error) => {
+        this.props.notifierService && this.props.notifierService.error(err.message);
       })
+    }
+    
+    if (this.props.queuer) {
+      this.props.queuer.pushTask(() => {
+        loadComponents();
+      })
+    }
+    else {
+      loadComponents();
+    }
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
+  private loadComponents() {
+    const ChartModule = import('../Chart/Chart')
+    const SearchBarModule = import('../SearchBar/SearchBar')
+    const ChartContainerModule = import('../ChartContainer/ChartContainer')
+
+    return Promise.all([ChartContainerModule, SearchBarModule, ChartModule]).then(modules => {
+      return modules;
+    }).catch(err => {
+      console.log(err);
+      throw new Error('Loading modules failed please refresh app');
     })
   }
 
