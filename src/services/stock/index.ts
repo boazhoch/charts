@@ -71,8 +71,8 @@ class StockService implements IApiService {
         return response.json();
       })
       .then(result => {
-        if (result.Note) {
-          throw new Error("Too much api calls please try in a minute");
+        if (result.Note || result['Error Message']) {
+          throw new Error(result['Error Message'] || result.Note);
         }
         return { err: undefined, data: this.normalizePayloadData(result) };
       })
