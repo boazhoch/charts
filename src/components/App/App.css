@@ -10,6 +10,11 @@
   margin-top: 25px;
 }
 
+button:hover {
+  background-color: initial;
+  border-color: none;
+}
+
 @media screen and (min-device-width: 768px)  {
   .hidden-sm {
     display: none !important;
