@@ -9,3 +9,9 @@
 .title {
   margin-top: 25px;
 }
+
+@media screen and (min-device-width: 768px)  {
+  .hidden-sm {
+    display: none !important;
+  }
+}

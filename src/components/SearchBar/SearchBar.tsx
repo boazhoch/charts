@@ -8,6 +8,8 @@ export interface ISearchBarProps {
   name: string;
   submitButtonText?: string;
   onSubmit(data: { [index: string]: string }): void;
+  validation: RegExp;
+  className?: string;
 }
 
 class SearchBar extends Component<ISearchBarProps> {
@@ -16,7 +18,7 @@ class SearchBar extends Component<ISearchBarProps> {
   };
 
   handleValidation = (value: string) => {
-    if (/^[a-zA-Z]+$/.test(value)) {
+    if (this.props.validation.test(value)) {
       return true;
     }
     return false;

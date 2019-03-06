@@ -91,25 +91,39 @@ class App extends Component<IProps, IState> {
         renderProp={(
           config: any,
           onChartInit: (chart: any) => void,
-          addData: (symbol: string) => void
+          addData: (symbol: string) => void,
+          setThresholdLine: (value: string) => void
         ) => (
             <>
-              <div className="columns">
-                <div className="column">
-                  <SearchBar
-                    submitButtonText={"Add stock"}
-                    placeholder={"Add stock by symbol ( try 'ms' if you want to add microsoft 😉)"}
-                    name={"Symbol"}
-                    type={"text"}
-                    onSubmit={(data: { [index: string]: string }) => {
-                      addData(data.Symbol);
-                    }}
-                  />
-                </div>
+              <div>
+                <SearchBar
+                  submitButtonText={"Add stock"}
+                  placeholder={"Add stock by symbol ( try 'ms' if you want to add microsoft 😉)"}
+                  name={"Symbol"}
+                  validation={/^[a-zA-Z]+$/}
+                  type={"text"}
+                  onSubmit={(data: { [index: string]: string }) => {
+                    addData(data.Symbol);
+                  }}
+                />
               </div>
-              <div className="columns">
-                <div className="column is-full">
+              <div>
+                <div>
                   <Chart config={config} onChartInit={onChartInit} />
+                </div>
+                <div className="hidden-sm row">
+                  <div className="column column-60 column-offset-20">
+                    <SearchBar
+                      submitButtonText={"Set threshold"}
+                      placeholder={"Enter a number to set threshold"}
+                      name={"threshold"}
+                      validation={/^\d+$/}
+                      type={"number"}
+                      onSubmit={(data: { [index: string]: string }) => {
+                        setThresholdLine(data.threshold)
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </>
@@ -132,10 +146,8 @@ class App extends Component<IProps, IState> {
                 A Simple app to present data in <strong>charts</strong>, have
                 fun.
               </h2>
-              <div className="columns is-fluid">
-                <div className="column is-full">
-                  {this.renderChart()}
-                </div>
+              <div>
+                {this.renderChart()}
               </div>
             </div>
           </section>

@@ -7,7 +7,6 @@ import { INotifier } from "../../services/notification/INotifier";
 import { draggablePlotLine } from "../Chart/draggablePlotLine";
 import {
   DEFAULT_CHART_OPTIONS,
-  THRESHOLD_DEFAULT_VALUE,
   IChartOptions
 } from "./defaultChartOptions";
 import cloneDeep from "lodash/cloneDeep";
@@ -19,7 +18,8 @@ export interface IChartContainerProps {
   renderProp: (
     config: any,
     onChartInit: (chart: any) => void,
-    addData: (symbol: string) => void
+    addData: (symbol: string) => void,
+    setThresholdLin: (value: string) => void
   ) => JSX.Element;
   cache: ICache;
 }
@@ -100,28 +100,34 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
    */
   private initThresholdLine(value: number) {
     if (!this.isThresholdLineExist) {
-      this.chart.update({
-        plotOptions: { series: { threshold: value } }
-      });
-      const line = this.chart.yAxis[0].addPlotLine({
-        value: value,
-        color: "rgba(239, 59, 59,1)",
-        width: 3,
-        zIndex: 10,
-        dashStyle: 'LongDash',
-        label: {
-          text: "Threshold"
-        },
-        id: "threshold",
-        onDragChange: (val: any) => {
-          this.chart.update({
-            plotOptions: { series: { threshold: val } }
-          });
-        }
-      });
-      draggablePlotLine(line.axis);
+      this.updateChartThresholdValue(value);
+      this.addThresholdLineToYAxis(value);
       this.isThresholdLineExist = true;
     }
+  }
+
+  private addThresholdLineToYAxis(value: number) {
+    const line = this.chart .get('yAxis').addPlotLine({
+      value: value,
+      color: "rgba(239, 59, 59,1)",
+      width: 3,
+      zIndex: 10,
+      dashStyle: 'LongDash',
+      label: {
+        text: "Threshold"
+      },
+      id: "threshold",
+      onDragChange: (val: any) => {
+        this.updateChartThresholdValue(val);
+      }
+    });
+    draggablePlotLine(line.axis);
+  }
+
+  private updateChartThresholdValue(val: number) {
+    this.chart && this.chart.update({
+      plotOptions: { series: { threshold: val } }
+    });
   }
 
   /**
@@ -135,6 +141,24 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
   private async getData(symbol: string) {
     const data = await this.apiService.getData({ symbol });
     return data;
+  }
+
+  /**
+   * Check if data already exist, notify if it is.
+   *
+   * @private
+   * @param {string} name
+   * @returns
+   * @memberof ChartContainer
+   */
+  private isDataExist(name: string) {
+    if (this.cache.isCached(name)) {
+      this.notifier.warning(
+        `Please note we already have ${name} on the chart`
+      );
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -188,29 +212,38 @@ class ChartContainer extends Component<IChartContainerProps, IState> {
       .catch(onError);
   };
 
-  /**
-   * Check if data already exist, notify if it is.
-   *
-   * @private
-   * @param {string} name
-   * @returns
-   * @memberof ChartContainer
-   */
-  private isDataExist(name:string) { 
-    if (this.cache.isCached(name)) {
-      this.notifier.warning(
-        `Please note we already have ${name} on the chart`
-      );
-      return true;
+  public setThresholdLine = (value: string) => {
+    if (!value) {
+      this.notifier.warning('No value for threshold line');
     }
-    return false;
+
+    let numericValue = parseInt(value);
+
+    const yAxis = this.chart && this.chart.get('yAxis');
+    const thresholdLine = yAxis && yAxis.plotLinesAndBands[0];
+
+    if (!yAxis || !thresholdLine) {
+      this.notifier.warning(`Can't set threshold value to a chart with no data, please add data.`);
+      return;
+    }
+
+    const plotLineOptions = thresholdLine.options;
+    plotLineOptions.value = numericValue;
+
+    yAxis.removePlotLine('threshold');
+    yAxis.addPlotLine(plotLineOptions);
+    this.updateChartThresholdValue(numericValue);
   }
 
+  
+  
+  
   render() {
     return this.props.renderProp(
       this.state.config,
       this.onChartInit,
-      this.addData
+      this.addData,
+      this.setThresholdLine
     );
   }
 }

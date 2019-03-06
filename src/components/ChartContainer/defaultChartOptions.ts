@@ -1,5 +1,3 @@
-const THRESHOLD_DEFAULT_VALUE = 10;
-
 export interface IChartOptions {
   chart: {
     zoomType: string;
@@ -15,7 +13,6 @@ export interface IChartOptions {
       dataLabels: {
         enabled: boolean;
       };
-      threshold: number;
     };
   };
   yAxis: {};
@@ -44,11 +41,11 @@ const DEFAULT_CHART_OPTIONS: IChartOptions = {
     series: {
       dataLabels: {
         enabled: true
-      },
-      threshold: THRESHOLD_DEFAULT_VALUE
+      }
     }
   },
   yAxis: {
+    id:'yAxis',
     title: {
       text: "Close rate"
     }
@@ -60,4 +57,4 @@ const DEFAULT_CHART_OPTIONS: IChartOptions = {
   ]
 };
 
-export { DEFAULT_CHART_OPTIONS, THRESHOLD_DEFAULT_VALUE };
+export { DEFAULT_CHART_OPTIONS };
