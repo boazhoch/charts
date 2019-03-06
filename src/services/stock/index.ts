@@ -73,13 +73,16 @@ class StockService implements IApiService {
       .get(this.constructQuery(options))
       .then(response => {
         if (!response.ok) {
-          throw new Error(response.statusText);
+          throw new Error('Something went really bad, we are sorry.');
         }
         return response.json();
       })
       .then(result => {
-        if (result.Note || result['Error Message']) {
-          throw new Error(result['Error Message'] || result.Note);
+        if (result.Note) {
+          throw new Error('Too many api calls, please wait a minute.')
+        }
+        if (result['Error Message']) {
+          throw new Error('This symbol does not exist.');
         }
         return { err: undefined, data: this.normalizePayloadData(result) };
       })

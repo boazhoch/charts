@@ -38,6 +38,9 @@ class App extends Component<IProps, IState> {
     }
   }
 
+  // On component mount lazy load components 
+  // If queuer is available utilize the idle of browser and add the task to the queue
+  // https://philipwalton.com/articles/idle-until-urgent/
   componentDidMount() {
     this.mounted = true;
     
@@ -68,6 +71,7 @@ class App extends Component<IProps, IState> {
     this.mounted = false;
   }
 
+  // Lazy load components
   private loadComponents() {
     const ChartModule = import('../Chart/Chart')
     const SearchBarModule = import('../SearchBar/SearchBar')
