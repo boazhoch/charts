@@ -17,7 +17,7 @@ describe('StockService', () => {
         expect(payload.err).toBeFalsy();
     });
 
-    it('should get receive an error', async () => {
+    it('should get data receive an error', async () => {
         Http.prototype.get = jest.fn().mockImplementationOnce(() => {
             return Promise.reject(new Error('Something weird happened'));
         });
@@ -26,12 +26,35 @@ describe('StockService', () => {
         expect(payload.data).toBeFalsy();
     });
 
-    it('should get receive an error', async () => {
+    it('should get data receive an error', async () => {
+        Http.prototype.get = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve({ ok: false, json: () => new Error('error')});
+        });
+        const payload = await instance.getData({ symbol: 'ms' });
+        expect(payload.err).toBeInstanceOf(Error);
+        expect(payload.data).toBeFalsy();
+        expect(payload.err && payload.err.message).toBe('Something went really bad, we are sorry.')
+    });
+
+    it('should get data receive an error for too many api calls', async () => {
         Http.prototype.get = jest.fn().mockImplementationOnce(() => {
             return Promise.resolve({ ok: true, json: () => ({ Note: 'Too many api calls.'})});
         });
         const payload = await instance.getData({ symbol: 'ms' });
-        expect(payload.err).toThrowError('')
+        if (payload.err) {
+            expect(payload.err.message).toBe('Too many api calls, please wait a minute.')
+        }
+        expect(payload.data).toBeFalsy();
+    });
+
+    it('should get data receive an error for searching a non existing symbol', async () => {
+        Http.prototype.get = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve({ ok: true, json: () => ({ 'Error Message': 'symbol not found' }) });
+        });
+        const payload = await instance.getData({ symbol: 'gogggggggg' });
+        if (payload.err) {
+            expect(payload.err.message).toBe('This symbol does not exist.')
+        }
         expect(payload.data).toBeFalsy();
     });
 });
